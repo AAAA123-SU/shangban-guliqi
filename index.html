@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a0c11" />
+  <meta name="description" content="上班鼓励器：把月薪换算成每一秒的收入，顺便给你一点继续上班的力气。" />
+  <title>上班鼓励器 · 你的每一秒都算数</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="aurora" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">励</span>
+        <div class="brand-text">
+          <h1>上班鼓励器</h1>
+          <p>把看不见的辛苦，换算成一个看得见的数字</p>
+        </div>
+      </div>
+      <div class="now-clock">
+        <span class="clock-date" id="clockDate">--</span>
+        <span class="clock-time" id="clockTime">--:--:--</span>
+      </div>
+    </header>
+
+    <div class="pep" id="pepBar">
+      <span class="pep-mark" aria-hidden="true"></span>
+      <p class="pep-text" id="pepText">今天也辛苦你了，先喝口水。</p>
+    </div>
+
+    <section class="card setup" id="setupCard" data-mode="edit">
+      <div class="card-head">
+        <h2>先算算，你的时间值多少</h2>
+        <p>所有数字只保存在你自己的浏览器里，不会上传</p>
+      </div>
+
+      <form id="form" novalidate>
+        <div class="grid-3">
+          <div class="field" id="field-salary">
+            <label for="salaryInput">月薪 <span class="unit">元</span></label>
+            <div class="input-shell">
+              <span class="affix">¥</span>
+              <input id="salaryInput" name="salary" type="text" inputmode="decimal"
+                     autocomplete="off" placeholder="10000" aria-describedby="err-salary" />
+              <span class="affix end">/ 月</span>
+            </div>
+            <p class="err" id="err-salary" role="alert"></p>
+          </div>
+
+          <div class="field" id="field-days">
+            <label for="daysInput">每月上班天数 <span class="unit">天</span></label>
+            <div class="input-shell">
+              <input id="daysInput" name="days" type="text" inputmode="numeric"
+                     autocomplete="off" placeholder="22" aria-describedby="err-days" />
+              <span class="affix end">/ 月</span>
+            </div>
+            <p class="err" id="err-days" role="alert"></p>
+          </div>
+
+          <div class="field" id="field-hours">
+            <span class="field-label">每日有效工时 <span class="unit">自动计算</span></span>
+            <div class="readonly-shell" id="effortHours" aria-live="polite">
+              <strong id="effortHoursText">8 小时</strong>
+              <span class="ro-note" id="effortHoursNote">在岗 9 小时 30 分，扣除午休 1 小时 30 分</span>
+            </div>
+            <p class="err" id="err-hours" role="alert"></p>
+          </div>
+        </div>
+
+        <div class="schedule" id="scheduleBlock">
+          <div class="schedule-head">
+            <span class="section-label">每天的作息</span>
+            <label class="switch">
+              <input type="checkbox" id="lunchToggle" checked />
+              <span>中午有午休</span>
+            </label>
+          </div>
+
+          <div class="schedule-grid">
+            <div class="field">
+              <label for="startTime">上班打卡</label>
+              <div class="time-shell"><input type="time" id="startTime" step="300" value="09:00" /></div>
+            </div>
+            <div class="field">
+              <label for="lunchStart">午休开始</label>
+              <div class="time-shell"><input type="time" id="lunchStart" step="300" value="12:00" /></div>
+            </div>
+            <div class="field">
+              <label for="lunchEnd">午休结束</label>
+              <div class="time-shell"><input type="time" id="lunchEnd" step="300" value="13:30" /></div>
+            </div>
+            <div class="field">
+              <label for="endTime">下班打卡</label>
+              <div class="time-shell"><input type="time" id="endTime" step="300" value="18:30" /></div>
+            </div>
+          </div>
+
+          <p class="err" id="err-schedule" role="alert"></p>
+        </div>
+
+        <div class="quick-row">
+          <span class="quick-label">常见节奏</span>
+          <button type="button" class="chip" data-preset="double">双休 · 22 天</button>
+          <button type="button" class="chip" data-preset="bigweek">大小周 · 24 天</button>
+          <button type="button" class="chip" data-preset="overtime">单休 · 26 天</button>
+        </div>
+
+        <div class="payday-line">
+          <div class="field payday-field" id="field-payday">
+            <label for="paydayInput">发薪日 <span class="unit">每月这天到账</span></label>
+            <div class="payday-shell">
+              <span class="affix">每月</span>
+              <input id="paydayInput" name="payday" type="text" inputmode="numeric"
+                     autocomplete="off" placeholder="12" value="12" maxlength="2" aria-describedby="err-payday" />
+              <span class="affix end">号</span>
+            </div>
+            <p class="err" id="err-payday" role="alert"></p>
+          </div>
+          <p class="payday-tip">用来倒计时到下次发薪，并估算这个周期已经赚到多少，默认每月 12 号</p>
+        </div>
+
+        <div class="form-foot">
+          <p class="preview" id="previewText">填好月薪、天数与作息，就能看到你每秒的收入</p>
+          <button type="submit" class="primary-btn" id="submitBtn">开始算一算</button>
+        </div>
+      </form>
+
+      <div class="setup-summary" id="setupSummary">
+        <div class="sum-grid">
+          <div><span>月薪</span><strong id="sumSalary">—</strong></div>
+          <div><span>上班天数</span><strong id="sumDays">—</strong></div>
+          <div><span>每日有效工时</span><strong id="sumHours">—</strong></div>
+          <div><span>作息</span><strong id="sumSchedule">—</strong></div>
+          <div><span>发薪日</span><strong id="sumPayday">—</strong></div>
+        </div>
+        <button type="button" class="ghost-btn" id="editBtn">修改参数</button>
+      </div>
+    </section>
+
+    <div class="result-area" id="resultArea" hidden>
+      <section class="card hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <p class="eyebrow">你每秒的收入</p>
+        <div class="hero-number">
+          <span class="cur" aria-hidden="true">¥</span><span class="fig"><span id="heroInt">0</span><span class="dec" id="heroDec">.0000</span></span>
+        </div>
+        <p class="hero-sub">真正算钱的那些秒，都在变成这个数字</p>
+
+        <div class="mini-grid">
+          <div class="mini">
+            <span class="mini-label">每分钟</span>
+            <strong id="perMinute">¥0.00</strong>
+          </div>
+          <div class="mini">
+            <span class="mini-label">每小时</span>
+            <strong id="perHour">¥0.00</strong>
+          </div>
+          <div class="mini">
+            <span class="mini-label">每个工作日</span>
+            <strong id="perDay">¥0.00</strong>
+          </div>
+        </div>
+
+        <p class="hero-foot" id="unitFoot">赚到 1 元，大约需要 1 小时</p>
+      </section>
+
+      <section class="card payday-card">
+        <div class="payday-top">
+          <div>
+            <p class="eyebrow">距离发薪</p>
+            <p class="payday-target" id="paydayTarget">—</p>
+            <p class="payday-note" id="paydayNote">发薪日当天 0 点后到账</p>
+          </div>
+          <span class="payday-badge" id="paydayBadge">统计中</span>
+        </div>
+
+        <div class="countdown" aria-label="发薪倒计时">
+          <div class="cd"><strong id="cdDay">00</strong><span>天</span></div>
+          <div class="cd"><strong id="cdHour">00</strong><span>时</span></div>
+          <div class="cd"><strong id="cdMin">00</strong><span>分</span></div>
+          <div class="cd"><strong id="cdSec">00</strong><span>秒</span></div>
+        </div>
+
+        <div class="goal">
+          <div class="goal-row">
+            <span>本发薪周期 · 已赚到</span>
+            <span class="goal-right"><em id="cyclePct">0%</em><b id="cycleAmount">¥0 / ¥0</b></span>
+          </div>
+          <div class="bar">
+            <span class="bar-fill" id="cycleBar"></span>
+          </div>
+          <p class="goal-hint" id="cycleHint">按自然日估算，这个周期已经赚到约 ¥0</p>
+        </div>
+      </section>
+
+      <section class="card earn">
+        <div class="earn-head">
+          <div>
+            <p class="eyebrow">今天已赚 <span class="live-dot" id="liveDot" aria-hidden="true"></span></p>
+            <div class="earn-num"><span class="cur">¥</span><span id="earned">0.0000</span></div>
+          </div>
+          <span class="phase-badge" id="phaseBadge">未上班</span>
+        </div>
+
+        <p class="earn-time" id="earnTime">按当前时间自动结算</p>
+
+        <div class="goal">
+          <div class="goal-row">
+            <span>今日进度</span>
+            <span class="goal-right"><em id="goalPct">0%</em><b id="goalText">¥0.00 / ¥0.00</b></span>
+          </div>
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="goalBarWrap">
+            <span class="bar-fill" id="goalBar"></span>
+          </div>
+          <p class="goal-hint" id="goalHint">按当前时间结算，午休不计工时</p>
+        </div>
+
+        <p class="earn-foot" id="earnFoot">按 09:00 上班、18:30 下班计算，午休不计入工时</p>
+      </section>
+
+      <section class="card cheer">
+        <p class="eyebrow">说给你听</p>
+        <p class="cheer-text" id="cheerText" aria-live="polite">—</p>
+        <div class="cheer-actions">
+          <button type="button" class="ghost-btn small" id="nextCheer">换一句</button>
+          <button type="button" class="ghost-btn small" id="tiredBtn">我有点累</button>
+        </div>
+      </section>
+
+      <section class="card convert">
+        <p class="eyebrow">换算成生活</p>
+        <p class="convert-sub" id="convertSub">按你每秒的收入，这些东西值得你工作多久</p>
+        <ul class="convert-list" id="convertList"></ul>
+      </section>
+    </div>
+
+    <footer class="foot">
+      <p>上班鼓励器不评价你的价值，只记录你的付出。</p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
